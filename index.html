@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Giving Tree &mdash; AppADay 104</title>
+<meta name="description" content="Set giving goals as a percentage of household income, log each gift to your church and other charities, and watch a tree fill with leaves and fruit as you give.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fbf7ef;
+  --paper2:#f4eee1;
+  --card:#fffdf8;
+  --ink:#2f2a24;
+  --muted:#7d7264;
+  --line:#e4dac6;
+  --bark:#8a6743;
+  --leaf:#3f7d4e;
+  --leaf-lite:#5da272;
+  --apple:#c1442e;
+  --gold:#c08a2e;
+  --shadow:0 1px 2px rgba(47,42,36,.06),0 8px 24px rgba(47,42,36,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  background:var(--paper);
+  background-image:radial-gradient(circle at 18% 10%,#fffdf7 0%,rgba(255,253,247,0) 55%),radial-gradient(circle at 85% 88%,#f2ead9 0%,rgba(242,234,217,0) 60%);
+  color:var(--ink);
+  font-family:'Karla',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:16px;
+  line-height:1.5;
+  -webkit-text-size-adjust:100%;
+}
+h1,h2,h3{font-family:'Fraunces','Georgia',serif;font-weight:600;margin:0;letter-spacing:-.01em}
+a{color:inherit}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+
+/* ---------- top bar ---------- */
+.topbar{
+  display:flex;align-items:center;gap:12px;
+  padding:12px clamp(14px,3vw,28px);
+  border-bottom:1px solid var(--line);
+  background:rgba(251,247,239,.92);
+  backdrop-filter:blur(6px);
+  position:sticky;top:0;z-index:20;
+}
+.brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+.num{
+  font-family:'Fraunces',serif;font-size:12px;font-weight:700;letter-spacing:.14em;
+  color:var(--paper);background:var(--leaf);
+  padding:4px 8px;border-radius:6px;
+}
+.brand h1{font-size:clamp(19px,3.4vw,24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tagline{margin-left:auto;font-size:12.5px;color:var(--muted);display:none}
+.backlink{
+  font-size:13px;font-weight:700;text-decoration:none;color:var(--leaf);
+  border:1px solid var(--line);background:var(--card);
+  padding:7px 12px;border-radius:999px;white-space:nowrap;
+}
+.backlink:hover{border-color:var(--leaf);background:#f2f8f2}
+@media(min-width:760px){.tagline{display:block}}
+
+/* ---------- layout ---------- */
+main{
+  flex:1;width:100%;max-width:1180px;margin:0 auto;
+  padding:clamp(14px,2.6vw,26px);
+  display:grid;gap:clamp(14px,2.4vw,22px);
+  grid-template-columns:1fr;
+  align-content:start;
+}
+@media(min-width:940px){
+  main{grid-template-columns:minmax(0,1.02fr) minmax(0,1fr);align-items:start}
+}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:18px;
+  box-shadow:var(--shadow);
+}
+
+/* ---------- stage ---------- */
+.stage{padding:clamp(14px,2.4vw,20px);display:flex;flex-direction:column;gap:14px}
+.periodbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;background:var(--paper2);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{
+  border:0;background:transparent;color:var(--muted);
+  padding:6px 14px;border-radius:999px;font-size:13.5px;font-weight:700;
+}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(47,42,36,.12)}
+.periodbar select{
+  border:1px solid var(--line);background:var(--card);border-radius:10px;
+  padding:7px 10px;font-size:13.5px;font-weight:700;
+}
+.treewrap{display:flex;justify-content:center;padding:2px 0 0}
+svg.tree{width:100%;max-width:390px;height:auto;display:block}
+.leaf-dot{fill:none;stroke:#ddd3c0;stroke-width:1.1;transition:fill .5s ease,stroke .5s ease,opacity .5s ease;opacity:.85}
+.leaf-dot.on{fill:var(--leaf);stroke:var(--leaf);opacity:1}
+.leaf-dot.on.alt{fill:var(--leaf-lite);stroke:var(--leaf-lite)}
+.apple{fill:none;stroke:#ddd3c0;stroke-width:1.2;transition:fill .5s ease,stroke .5s ease}
+.apple.on{fill:var(--apple);stroke:#9c3524}
+.apple-stem{stroke:#b9ad98;stroke-width:1.4;stroke-linecap:round;transition:stroke .5s ease}
+.apple-stem.on{stroke:#6f5334}
+.treeline{text-align:center;font-family:'Fraunces',serif;font-size:15px;color:var(--muted);min-height:22px}
+
+.rings{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ring{
+  border:1px solid var(--line);border-radius:14px;background:var(--paper2);
+  padding:12px;display:flex;gap:12px;align-items:center;
+}
+.ring svg{flex:0 0 auto;width:74px;height:74px}
+.ring .rtrack{fill:none;stroke:#e6dcc8;stroke-width:9}
+.ring .rval{fill:none;stroke-width:9;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .6s ease}
+.ring.church .rval{stroke:var(--leaf)}
+.ring.other .rval{stroke:var(--apple)}
+.ring .rpct{font-family:'Fraunces',serif;font-size:17px;font-weight:700;fill:var(--ink)}
+.ring .meta{min-width:0}
+.ring .rlabel{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ring .rgiven{font-family:'Fraunces',serif;font-size:21px;font-weight:700;line-height:1.25;margin-top:2px}
+.ring .rgoal{font-size:12.5px;color:var(--muted)}
+@media(max-width:420px){
+  .rings{grid-template-columns:1fr}
+  .ring svg{width:64px;height:64px}
+}
+.pace{
+  border-top:1px dashed var(--line);padding-top:12px;
+  display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:space-between;font-size:13.5px;
+}
+.pace b{font-family:'Fraunces',serif;font-size:15px}
+.pace .ok{color:var(--leaf)}
+.pace .behind{color:var(--apple)}
+
+/* ---------- panel ---------- */
+.panel{padding:clamp(14px,2.4vw,20px);display:flex;flex-direction:column;gap:14px;min-width:0}
+.tabs{display:flex;gap:4px;background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:4px}
+.tabs button{
+  flex:1;border:0;background:transparent;color:var(--muted);
+  padding:9px 6px;border-radius:9px;font-size:14px;font-weight:700;
+}
+.tabs button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(47,42,36,.12)}
+.tabpane{display:none;flex-direction:column;gap:14px}
+.tabpane.active{display:flex}
+
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea{
+  border:1px solid var(--line);background:var(--paper);border-radius:11px;
+  padding:11px 12px;font-size:16px;width:100%;
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--leaf);outline-offset:1px;background:var(--card)}
+.field textarea{resize:vertical;min-height:60px}
+.hint{font-size:12.5px;color:var(--muted)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:380px){.row2{grid-template-columns:1fr}}
+.catpick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.catpick button{
+  border:1px solid var(--line);background:var(--paper);border-radius:11px;
+  padding:11px 8px;font-size:14px;font-weight:700;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.catpick button[aria-pressed="true"]{color:var(--ink);background:var(--card);border-color:currentColor}
+.catpick button[data-cat="church"][aria-pressed="true"]{border-color:var(--leaf);box-shadow:inset 0 0 0 1px var(--leaf)}
+.catpick button[data-cat="other"][aria-pressed="true"]{border-color:var(--apple);box-shadow:inset 0 0 0 1px var(--apple)}
+.swatch{width:11px;height:11px;border-radius:50%;display:inline-block}
+.sw-church{background:var(--leaf)}
+.sw-other{background:var(--apple)}
+
+.btn{
+  border:1px solid transparent;border-radius:12px;padding:12px 16px;
+  font-size:15px;font-weight:700;background:var(--leaf);color:#fff;
+}
+.btn:hover{background:#356a42}
+.btn.ghost{background:var(--card);color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--muted)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:disabled:hover{background:var(--leaf)}
+.btn.danger{background:var(--card);color:var(--apple);border-color:#e8c8c0}
+.btn.danger:hover{background:#fdf2ef}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+.btnrow .btn{flex:1;min-width:130px}
+
+.msg{font-size:13.5px;color:var(--leaf);font-weight:700;min-height:19px}
+.msg.warn{color:var(--apple)}
+
+.filterbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.filterbar input[type="search"]{
+  flex:1;min-width:140px;border:1px solid var(--line);background:var(--paper);
+  border-radius:11px;padding:9px 12px;font-size:15px;
+}
+.chipset{display:flex;gap:6px}
+.chip{
+  border:1px solid var(--line);background:var(--paper);border-radius:999px;
+  padding:7px 12px;font-size:13px;font-weight:700;color:var(--muted);
+}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+.giftlist{display:flex;flex-direction:column;gap:8px;max-height:min(46vh,430px);overflow:auto;padding-right:2px}
+.gift{
+  border:1px solid var(--line);border-radius:13px;background:var(--paper);
+  padding:10px 12px;display:grid;grid-template-columns:6px 1fr auto;gap:10px;align-items:center;
+}
+.gift .bar{align-self:stretch;border-radius:3px;background:var(--leaf);min-height:34px}
+.gift.other .bar{background:var(--apple)}
+.gift .who{font-weight:700;font-size:15px;word-break:break-word}
+.gift .when{font-size:12.5px;color:var(--muted)}
+.gift .note{font-size:12.5px;color:var(--muted);font-style:italic;word-break:break-word}
+.gift .amt{font-family:'Fraunces',serif;font-weight:700;font-size:16px;text-align:right;white-space:nowrap}
+.gift .del{
+  border:0;background:transparent;color:var(--muted);font-size:17px;line-height:1;
+  padding:4px 2px;border-radius:6px;
+}
+.gift .del:hover{color:var(--apple)}
+.giftright{display:flex;align-items:center;gap:6px}
+.empty{text-align:center;color:var(--muted);font-size:14px;padding:22px 10px;border:1px dashed var(--line);border-radius:13px}
+
+.summary{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:7px}
+.summary h3{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-family:'Karla',sans-serif;font-weight:700}
+.srow{display:flex;justify-content:space-between;gap:12px;font-size:14px;border-bottom:1px dotted var(--line);padding-bottom:5px}
+.srow:last-child{border-bottom:0}
+.srow span:first-child{min-width:0;word-break:break-word}
+.srow b{font-family:'Fraunces',serif;white-space:nowrap}
+
+.goalbox{background:var(--paper2);border:1px solid var(--line);border-radius:13px;padding:12px}
+.goalbox .srow{border-color:#ded3bd}
+.goalbox h3{margin-bottom:4px}
+.pastearea{
+  border:1px solid var(--line);background:var(--paper);border-radius:11px;
+  padding:11px 12px;font-size:14px;width:100%;min-height:110px;resize:vertical;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+.pastearea:focus{outline:2px solid var(--leaf);outline-offset:1px;background:var(--card)}
+.previewtbl{font-size:13px;margin-top:4px}
+.previewtbl .prow{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dotted #ded3bd}
+.previewtbl .prow:last-child{border-bottom:0}
+.previewtbl .pto{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.previewtbl .pdate{color:var(--muted);white-space:nowrap}
+.tally{font-size:13.5px;margin:8px 0 4px}
+.tally b{font-family:'Fraunces',serif}
+.tally .bad{color:var(--apple)}
+
+footer{
+  border-top:1px solid var(--line);padding:16px clamp(14px,3vw,28px) 26px;
+  display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;justify-content:center;
+  font-size:13px;color:var(--muted);text-align:center;
+}
+footer a{color:var(--leaf);font-weight:700}
+
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:40;
+  background:var(--ink);color:var(--paper);border-radius:999px;
+  padding:10px 12px 10px 18px;display:none;align-items:center;gap:12px;
+  font-size:14px;box-shadow:0 10px 28px rgba(47,42,36,.28);max-width:calc(100% - 28px);
+}
+.toast.show{display:flex}
+.toast button{border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 14px;font-weight:700;font-size:13.5px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="num">104</span>
+    <h1>Giving Tree</h1>
+  </div>
+  <span class="tagline">Give first, and watch it grow</span>
+  <a class="backlink" href="https://augustineiacopelli.github.io/appaday/">AppADay</a>
+</header>
+
+<main>
+
+  <section class="card stage">
+    <div class="periodbar">
+      <div class="seg" role="group" aria-label="Period">
+        <button type="button" id="modeYear" aria-pressed="true">Year</button>
+        <button type="button" id="modeMonth" aria-pressed="false">Month</button>
+      </div>
+      <select id="yearSel" aria-label="Year"></select>
+      <select id="monthSel" aria-label="Month" style="display:none"></select>
+    </div>
+
+    <div class="treewrap">
+      <svg class="tree" viewBox="0 62 320 254" role="img" aria-labelledby="treeTitle">
+        <title id="treeTitle">A tree whose leaves show progress toward the church goal and whose fruit shows progress toward the other-charity goal</title>
+        <path d="M22 306 C86 297 234 297 298 306" fill="none" stroke="#e0d5c0" stroke-width="2.5" stroke-linecap="round"></path>
+        <path d="M138 308 C142 266 146 234 149 210 L159 210 C162 234 166 266 170 308 C160 300 148 300 138 308 Z" fill="#ead9c0" stroke="#8a6743" stroke-width="2.2" stroke-linejoin="round"></path>
+        <path d="M152 214 C140 200 126 192 112 186" fill="none" stroke="#8a6743" stroke-width="5" stroke-linecap="round"></path>
+        <path d="M156 210 C168 196 182 190 196 184" fill="none" stroke="#8a6743" stroke-width="5" stroke-linecap="round"></path>
+        <path d="M154 206 C152 190 152 178 153 166" fill="none" stroke="#8a6743" stroke-width="4" stroke-linecap="round"></path>
+        <path d="M150 200 C142 188 132 180 122 172" fill="none" stroke="#8a6743" stroke-width="3" stroke-linecap="round"></path>
+        <path d="M158 198 C166 186 176 180 186 172" fill="none" stroke="#8a6743" stroke-width="3" stroke-linecap="round"></path>
+        <g id="leafGroup"></g>
+        <g id="appleGroup"></g>
+      </svg>
+    </div>
+    <p class="treeline" id="treeLine">Set your income in Setup to plant the goal.</p>
+
+    <div class="rings">
+      <div class="ring church">
+        <svg viewBox="0 0 84 84" aria-hidden="true">
+          <circle class="rtrack" cx="42" cy="42" r="34"></circle>
+          <circle class="rval" id="ringChurch" cx="42" cy="42" r="34"></circle>
+          <text class="rpct" id="pctChurchTxt" x="42" y="48" text-anchor="middle">0%</text>
+        </svg>
+        <div class="meta">
+          <div class="rlabel">Church</div>
+          <div class="rgiven" id="givenChurch">$0</div>
+          <div class="rgoal" id="goalChurch">goal not set</div>
+        </div>
+      </div>
+      <div class="ring other">
+        <svg viewBox="0 0 84 84" aria-hidden="true">
+          <circle class="rtrack" cx="42" cy="42" r="34"></circle>
+          <circle class="rval" id="ringOther" cx="42" cy="42" r="34"></circle>
+          <text class="rpct" id="pctOtherTxt" x="42" y="48" text-anchor="middle">0%</text>
+        </svg>
+        <div class="meta">
+          <div class="rlabel">Other charity</div>
+          <div class="rgiven" id="givenOther">$0</div>
+          <div class="rgoal" id="goalOther">goal not set</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pace">
+      <span>Given so far: <b id="totalGiven">$0</b></span>
+      <span>Share of income: <b id="sharePct">&mdash;</b></span>
+      <span id="paceTxt">&nbsp;</span>
+    </div>
+  </section>
+
+  <section class="card panel">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabLogBtn" aria-controls="tabLog" aria-selected="true">Log a gift</button>
+      <button type="button" role="tab" id="tabGiftsBtn" aria-controls="tabGifts" aria-selected="false">Gifts</button>
+      <button type="button" role="tab" id="tabSetupBtn" aria-controls="tabSetup" aria-selected="false">Setup</button>
+    </div>
+
+    <div class="tabpane active" id="tabLog" role="tabpanel">
+      <div class="row2">
+        <div class="field">
+          <label for="inAmount">Amount</label>
+          <input id="inAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label for="inDate">Date</label>
+          <input id="inDate" type="date">
+        </div>
+      </div>
+      <div class="field">
+        <label for="inTo">Given to</label>
+        <input id="inTo" type="text" list="recipientList" placeholder="St. Mary Parish" maxlength="60" autocomplete="off">
+        <datalist id="recipientList"></datalist>
+      </div>
+      <div class="field">
+        <label id="catLabel">Category</label>
+        <div class="catpick" role="group" aria-labelledby="catLabel">
+          <button type="button" data-cat="church" aria-pressed="true"><span class="swatch sw-church"></span>Church</button>
+          <button type="button" data-cat="other" aria-pressed="false"><span class="swatch sw-other"></span>Other charity</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="inNote">Note <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional)</span></label>
+        <input id="inNote" type="text" placeholder="Building fund, memorial, tithe envelope" maxlength="90" autocomplete="off">
+      </div>
+      <button type="button" class="btn" id="addBtn">Add gift</button>
+      <p class="msg" id="logMsg">&nbsp;</p>
+    </div>
+
+    <div class="tabpane" id="tabGifts" role="tabpanel">
+      <div class="filterbar">
+        <input type="search" id="searchIn" placeholder="Search recipient or note" autocomplete="off">
+        <div class="chipset">
+          <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="chip" data-filter="church" aria-pressed="false">Church</button>
+          <button type="button" class="chip" data-filter="other" aria-pressed="false">Other</button>
+        </div>
+      </div>
+      <div class="giftlist" id="giftList"></div>
+      <div class="summary">
+        <h3>By recipient, this period</h3>
+        <div id="recipSummary"></div>
+      </div>
+      <div class="btnrow">
+        <button type="button" class="btn ghost" id="csvBtn">Export CSV</button>
+        <button type="button" class="btn ghost" id="jsonBtn">Backup JSON</button>
+      </div>
+    </div>
+
+    <div class="tabpane" id="tabSetup" role="tabpanel">
+      <div class="row2">
+        <div class="field">
+          <label for="inIncome">Household income</label>
+          <input id="inIncome" type="number" inputmode="decimal" min="0" step="1" placeholder="0">
+        </div>
+        <div class="field">
+          <label for="inFreq">Income period</label>
+          <select id="inFreq">
+            <option value="annual">Per year</option>
+            <option value="monthly">Per month</option>
+          </select>
+        </div>
+      </div>
+      <p class="hint">Use expected gross income. Everything else is figured from this number.</p>
+      <div class="row2">
+        <div class="field">
+          <label for="inPctChurch">Church goal (%)</label>
+          <input id="inPctChurch" type="number" inputmode="decimal" min="0" max="100" step="0.1" placeholder="8">
+        </div>
+        <div class="field">
+          <label for="inPctOther">Other charity goal (%)</label>
+          <input id="inPctOther" type="number" inputmode="decimal" min="0" max="100" step="0.1" placeholder="2">
+        </div>
+      </div>
+      <div class="goalbox">
+        <div class="srow"><span>Annual income</span><b id="calcIncome">&mdash;</b></div>
+        <div class="srow"><span>Church, per year</span><b id="calcChurchY">&mdash;</b></div>
+        <div class="srow"><span>Church, per month</span><b id="calcChurchM">&mdash;</b></div>
+        <div class="srow"><span>Other charity, per year</span><b id="calcOtherY">&mdash;</b></div>
+        <div class="srow"><span>Other charity, per month</span><b id="calcOtherM">&mdash;</b></div>
+        <div class="srow"><span>Combined, per week</span><b id="calcAllW">&mdash;</b></div>
+      </div>
+      <div class="field">
+        <label id="impLabel">Import past giving</label>
+        <div class="btnrow" role="group" aria-labelledby="impLabel">
+          <button type="button" class="btn ghost" id="csvFileBtn">Upload CSV</button>
+          <button type="button" class="btn ghost" id="pasteBtn">Paste rows</button>
+        </div>
+        <textarea id="pasteArea" class="pastearea" style="display:none" spellcheck="false" placeholder="Date,Amount,Recipient,Category
+2026-01-05,250,St. Mary Parish,church
+2026-01-19,100,Catholic Charities,other"></textarea>
+        <button type="button" class="btn ghost" id="parseBtn" style="display:none">Read these rows</button>
+        <p class="hint">A bank or envelope-system export, a spreadsheet, or an old tracker. Commas, tabs, or semicolons; columns in any order.</p>
+      </div>
+
+      <div class="goalbox" id="mapPanel" style="display:none">
+        <h3>Match the columns</h3>
+        <div class="row2">
+          <div class="field"><label for="colDate">Date</label><select id="colDate"></select></div>
+          <div class="field"><label for="colAmount">Amount</label><select id="colAmount"></select></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="colTo">Recipient</label><select id="colTo"></select></div>
+          <div class="field"><label for="colCat">Category</label><select id="colCat"></select></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="dateOrder">Slash dates</label><select id="dateOrder">
+            <option value="mdy">Month / Day / Year</option>
+            <option value="dmy">Day / Month / Year</option>
+          </select></div>
+          <div class="field"><label for="hasHeader">First row</label><select id="hasHeader">
+            <option value="1">Is a header</option>
+            <option value="0">Is data</option>
+          </select></div>
+        </div>
+        <div class="tally" id="impTally"></div>
+        <div class="previewtbl" id="impPreview"></div>
+        <div class="btnrow">
+          <button type="button" class="btn" id="doImportBtn">Import gifts</button>
+          <button type="button" class="btn ghost" id="cancelImportBtn">Cancel</button>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <button type="button" class="btn ghost" id="importBtn">Restore backup</button>
+        <button type="button" class="btn danger" id="resetBtn">Erase all data</button>
+      </div>
+      <input type="file" id="fileIn" accept="application/json,.json" class="sr">
+      <input type="file" id="csvIn" accept=".csv,.tsv,.txt,text/csv,text/plain" class="sr">
+      <p class="msg" id="setupMsg">&nbsp;</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>AppADay 104 &middot; Giving Tree &middot; a nod to a certain generous tree from a picture book</span>
+  <a href="https://augustineiacopelli.github.io/appaday/">See the whole archive</a>
+</footer>
+
+<div class="toast" id="toast">
+  <span id="toastTxt">Gift removed</span>
+  <button type="button" id="undoBtn">Undo</button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var LS_KEY = 'appaday-104-giving-tree';
+  var LEAF_COUNT = 70;
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var fmt0 = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0,maximumFractionDigits:0});
+  var fmt2 = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
+  var now = new Date();
+
+  var state = {
+    income: 0,
+    freq: 'annual',
+    pctChurch: 8,
+    pctOther: 2,
+    gifts: [],
+    mode: 'year',
+    year: now.getFullYear(),
+    month: now.getMonth()
+  };
+
+  var ui = { cat:'church', filter:'all', search:'', pendingReset:false, resetTimer:0, toastTimer:0, lastDeleted:null };
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function clamp(n,lo,hi){ return n<lo?lo:(n>hi?hi:n); }
+  function num(v){ var n = parseFloat(v); return isFinite(n)&&n>0 ? n : 0; }
+  function pad2(n){ return (n<10?'0':'')+n; }
+  function todayISO(){
+    var d = new Date();
+    return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+  }
+
+  /* ---------- storage ---------- */
+  function save(){
+    try{
+      localStorage.setItem(LS_KEY, JSON.stringify({
+        income:state.income, freq:state.freq, pctChurch:state.pctChurch,
+        pctOther:state.pctOther, gifts:state.gifts
+      }));
+    }catch(e){ /* private mode or full quota; app still works this session */ }
+  }
+  function load(){
+    try{
+      var raw = localStorage.getItem(LS_KEY);
+      if(!raw) return;
+      var d = JSON.parse(raw);
+      if(!d || typeof d !== 'object') return;
+      state.income = num(d.income);
+      state.freq = d.freq === 'monthly' ? 'monthly' : 'annual';
+      state.pctChurch = isFinite(parseFloat(d.pctChurch)) ? clamp(parseFloat(d.pctChurch),0,100) : 8;
+      state.pctOther = isFinite(parseFloat(d.pctOther)) ? clamp(parseFloat(d.pctOther),0,100) : 2;
+      state.gifts = sanitizeGifts(d.gifts);
+    }catch(e){ /* corrupt payload: fall back to defaults */ }
+  }
+  function sanitizeGifts(list){
+    var out = [];
+    if(!list || !list.length) return out;
+    for(var i=0;i<list.length;i++){
+      var g = list[i];
+      if(!g || typeof g !== 'object') continue;
+      var amt = parseFloat(g.amount);
+      var date = String(g.date||'');
+      if(!isFinite(amt) || amt<=0) continue;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+      out.push({
+        id: String(g.id || (Date.now()+'-'+i+'-'+Math.round(Math.random()*100000))),
+        date: date,
+        amount: Math.round(amt*100)/100,
+        to: String(g.to||'').slice(0,60),
+        cat: g.cat === 'other' ? 'other' : 'church',
+        note: String(g.note||'').slice(0,90)
+      });
+    }
+    return out;
+  }
+
+  /* ---------- tree art ---------- */
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var APPLE_POS = [
+    [118,132],[186,136],[152,108],[100,164],[204,162],[132,178],
+    [174,182],[128,106],[180,108],[152,158],[96,140],[210,146]
+  ].sort(function(a,b){ return b[1]-a[1]; });
+  var leafEls = [];
+  var appleEls = [];
+
+  function buildTree(){
+    var rnd = mulberry32(20260819);
+    var cx=152, cy=146, rx=88, ry=58, pts=[], guard=0;
+    while(pts.length < LEAF_COUNT && guard < 20000){
+      guard++;
+      var x = cx + (rnd()*2-1)*rx;
+      var y = cy + (rnd()*2-1)*ry;
+      var dx = (x-cx)/rx, dy = (y-cy)/ry;
+      if(dx*dx + dy*dy > 1) continue;
+      if(y > 198) continue;
+      var ok = true;
+      for(var j=0;j<pts.length;j++){
+        var ddx = pts[j][0]-x, ddy = pts[j][1]-y;
+        if(ddx*ddx + ddy*ddy < 128){ ok=false; break; }
+      }
+      if(!ok) continue;
+      pts.push([x,y,6.5+rnd()*3.4,rnd()]);
+    }
+    pts.sort(function(a,b){ return b[1]-a[1]; });
+    var g = $('leafGroup');
+    for(var i=0;i<pts.length;i++){
+      var c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx', pts[i][0].toFixed(1));
+      c.setAttribute('cy', pts[i][1].toFixed(1));
+      c.setAttribute('r', pts[i][2].toFixed(1));
+      c.setAttribute('class', pts[i][3] > 0.55 ? 'leaf-dot alt' : 'leaf-dot');
+      g.appendChild(c);
+      leafEls.push(c);
+    }
+    var ag = $('appleGroup');
+    for(var k=0;k<APPLE_POS.length;k++){
+      var stem = document.createElementNS('http://www.w3.org/2000/svg','path');
+      stem.setAttribute('d','M'+APPLE_POS[k][0]+' '+(APPLE_POS[k][1]-5)+' q1.5 -4 4 -5.5');
+      stem.setAttribute('fill','none');
+      stem.setAttribute('class','apple-stem');
+      ag.appendChild(stem);
+      var a = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      a.setAttribute('cx', APPLE_POS[k][0]);
+      a.setAttribute('cy', APPLE_POS[k][1]);
+      a.setAttribute('r', '5.6');
+      a.setAttribute('class','apple');
+      ag.appendChild(a);
+      appleEls.push({dot:a, stem:stem});
+    }
+  }
+
+  function paintTree(pChurch, pOther, hasGoal){
+    var lit = hasGoal ? Math.round(clamp(pChurch,0,1)*leafEls.length) : 0;
+    for(var i=0;i<leafEls.length;i++){
+      var on = i < lit;
+      var cls = leafEls[i].getAttribute('class').indexOf('alt')>-1 ? 'leaf-dot alt' : 'leaf-dot';
+      leafEls[i].setAttribute('class', on ? cls+' on' : cls);
+    }
+    var fruit = hasGoal ? Math.round(clamp(pOther,0,1)*appleEls.length) : 0;
+    for(var k=0;k<appleEls.length;k++){
+      var lit2 = k < fruit;
+      appleEls[k].dot.setAttribute('class', lit2 ? 'apple on' : 'apple');
+      appleEls[k].stem.setAttribute('class', lit2 ? 'apple-stem on' : 'apple-stem');
+    }
+  }
+
+  /* ---------- math ---------- */
+  function annualIncome(){ return state.freq === 'monthly' ? state.income*12 : state.income; }
+
+  function goals(){
+    var inc = annualIncome();
+    var divisor = state.mode === 'month' ? 12 : 1;
+    return {
+      income: inc/divisor,
+      church: (inc*state.pctChurch/100)/divisor,
+      other: (inc*state.pctOther/100)/divisor
+    };
+  }
+
+  function periodKey(){
+    return state.mode === 'month'
+      ? state.year+'-'+pad2(state.month+1)
+      : String(state.year);
+  }
+
+  function inPeriod(g){
+    var key = periodKey();
+    return g.date.slice(0, key.length) === key;
+  }
+
+  function periodGifts(){
+    return state.gifts.filter(inPeriod).sort(function(a,b){
+      if(a.date === b.date) return a.id < b.id ? 1 : -1;
+      return a.date < b.date ? 1 : -1;
+    });
+  }
+
+  function elapsedFraction(){
+    var start, end;
+    if(state.mode === 'month'){
+      start = new Date(state.year, state.month, 1);
+      end = new Date(state.year, state.month+1, 1);
+    }else{
+      start = new Date(state.year, 0, 1);
+      end = new Date(state.year+1, 0, 1);
+    }
+    var t = Date.now();
+    if(t <= start.getTime()) return 0;
+    if(t >= end.getTime()) return 1;
+    return (t - start.getTime()) / (end.getTime() - start.getTime());
+  }
+
+  function treeWords(p, hasGoal){
+    if(!hasGoal) return 'Set your income in Setup to plant the goal.';
+    if(p <= 0) return 'Bare branches. Nothing logged yet this period.';
+    if(p < 0.25) return 'First buds are out.';
+    if(p < 0.6) return 'Filling in nicely.';
+    if(p < 1) return 'Almost a full canopy.';
+    if(p < 1.25) return 'Full canopy. Goal met.';
+    return 'Overflowing. Well past the goal.';
+  }
+
+  /* ---------- render ---------- */
+  var RING_C = 2*Math.PI*34;
+
+  function setRing(el, txtEl, p, hasGoal){
+    var v = hasGoal ? clamp(p,0,1) : 0;
+    el.setAttribute('stroke-dasharray', RING_C.toFixed(2));
+    el.setAttribute('stroke-dashoffset', (RING_C*(1-v)).toFixed(2));
+    txtEl.textContent = hasGoal ? Math.round(p*100)+'%' : '0%';
+  }
+
+  function render(){
+    var g = goals();
+    var hasGoal = g.church > 0 || g.other > 0;
+    var list = periodGifts();
+    var sumChurch = 0, sumOther = 0;
+    for(var i=0;i<list.length;i++){
+      if(list[i].cat === 'church') sumChurch += list[i].amount; else sumOther += list[i].amount;
+    }
+    var pChurch = g.church > 0 ? sumChurch/g.church : 0;
+    var pOther = g.other > 0 ? sumOther/g.other : 0;
+    var totalGoal = g.church + g.other;
+    var totalGiven = sumChurch + sumOther;
+    var pAll = totalGoal > 0 ? totalGiven/totalGoal : 0;
+
+    setRing($('ringChurch'), $('pctChurchTxt'), pChurch, g.church > 0);
+    setRing($('ringOther'), $('pctOtherTxt'), pOther, g.other > 0);
+    $('givenChurch').textContent = fmt0.format(sumChurch);
+    $('givenOther').textContent = fmt0.format(sumOther);
+    $('goalChurch').textContent = g.church > 0 ? 'of '+fmt0.format(g.church)+' goal' : 'goal not set';
+    $('goalOther').textContent = g.other > 0 ? 'of '+fmt0.format(g.other)+' goal' : 'goal not set';
+
+    paintTree(pChurch, pOther, hasGoal);
+    $('treeLine').textContent = treeWords(pAll, hasGoal);
+
+    $('totalGiven').textContent = fmt0.format(totalGiven);
+    $('sharePct').textContent = g.income > 0 ? (totalGiven/g.income*100).toFixed(1)+'%' : '\u2014';
+
+    var paceEl = $('paceTxt');
+    if(!hasGoal){
+      paceEl.innerHTML = '&nbsp;';
+    }else{
+      var expected = totalGoal * elapsedFraction();
+      var diff = totalGiven - expected;
+      if(Math.abs(diff) < 1){
+        paceEl.innerHTML = 'Pace: <b class="ok">right on track</b>';
+      }else if(diff > 0){
+        paceEl.innerHTML = 'Pace: <b class="ok">ahead by '+esc(fmt0.format(diff))+'</b>';
+      }else{
+        paceEl.innerHTML = 'Pace: <b class="behind">behind by '+esc(fmt0.format(-diff))+'</b>';
+      }
+    }
+
+    renderList(list);
+    renderRecipients(list);
+    renderDatalist();
+    renderGoalBox();
+  }
+
+  function renderList(list){
+    var wrap = $('giftList');
+    var q = ui.search.toLowerCase();
+    var shown = list.filter(function(g){
+      if(ui.filter !== 'all' && g.cat !== ui.filter) return false;
+      if(!q) return true;
+      return (g.to+' '+g.note).toLowerCase().indexOf(q) > -1;
+    });
+    if(!shown.length){
+      wrap.innerHTML = '<p class="empty">'+(list.length ? 'No gifts match that filter.' : 'No gifts logged for this period yet.')+'</p>';
+      return;
+    }
+    var html = '';
+    for(var i=0;i<shown.length;i++){
+      var g = shown[i];
+      var parts = g.date.split('-');
+      var when = MONTHS[parseInt(parts[1],10)-1].slice(0,3)+' '+parseInt(parts[2],10)+', '+parts[0];
+      html += '<div class="gift'+(g.cat==='other'?' other':'')+'">'
+        + '<div class="bar"></div>'
+        + '<div><div class="who">'+esc(g.to || (g.cat==='church'?'Church':'Charity'))+'</div>'
+        + '<div class="when">'+esc(when)+'</div>'
+        + (g.note ? '<div class="note">'+esc(g.note)+'</div>' : '')
+        + '</div>'
+        + '<div class="giftright"><span class="amt">'+esc(fmt2.format(g.amount))+'</span>'
+        + '<button type="button" class="del" data-id="'+esc(g.id)+'" aria-label="Delete gift">\u00d7</button></div>'
+        + '</div>';
+    }
+    wrap.innerHTML = html;
+  }
+
+  function renderRecipients(list){
+    var map = {}, order = [];
+    for(var i=0;i<list.length;i++){
+      var name = list[i].to || (list[i].cat==='church' ? 'Church' : 'Charity');
+      var key = name.toLowerCase();
+      if(!map[key]){ map[key] = {name:name, total:0, count:0}; order.push(key); }
+      map[key].total += list[i].amount;
+      map[key].count += 1;
+    }
+    order.sort(function(a,b){ return map[b].total - map[a].total; });
+    var el = $('recipSummary');
+    if(!order.length){
+      el.innerHTML = '<p class="hint">Nothing logged for this period.</p>';
+      return;
+    }
+    var html = '';
+    for(var k=0;k<order.length;k++){
+      var r = map[order[k]];
+      html += '<div class="srow"><span>'+esc(r.name)+' <span class="hint">('+r.count+')</span></span><b>'+esc(fmt2.format(r.total))+'</b></div>';
+    }
+    el.innerHTML = html;
+  }
+
+  function renderDatalist(){
+    var seen = {}, names = [];
+    for(var i=state.gifts.length-1;i>=0 && names.length<25;i--){
+      var n = state.gifts[i].to;
+      if(!n) continue;
+      var k = n.toLowerCase();
+      if(seen[k]) continue;
+      seen[k] = 1; names.push(n);
+    }
+    var html = '';
+    for(var j=0;j<names.length;j++) html += '<option value="'+esc(names[j])+'"></option>';
+    $('recipientList').innerHTML = html;
+  }
+
+  function renderGoalBox(){
+    var inc = annualIncome();
+    if(inc <= 0){
+      var ids = ['calcIncome','calcChurchY','calcChurchM','calcOtherY','calcOtherM','calcAllW'];
+      for(var i=0;i<ids.length;i++) $(ids[i]).innerHTML = '&mdash;';
+      return;
+    }
+    var cy = inc*state.pctChurch/100;
+    var oy = inc*state.pctOther/100;
+    $('calcIncome').textContent = fmt0.format(inc);
+    $('calcChurchY').textContent = fmt0.format(cy);
+    $('calcChurchM').textContent = fmt2.format(cy/12);
+    $('calcOtherY').textContent = fmt0.format(oy);
+    $('calcOtherM').textContent = fmt2.format(oy/12);
+    $('calcAllW').textContent = fmt2.format((cy+oy)/52);
+  }
+
+  /* ---------- period controls ---------- */
+  function buildPeriodSelects(){
+    var years = {}, y;
+    for(var i=0;i<state.gifts.length;i++) years[state.gifts[i].date.slice(0,4)] = 1;
+    years[String(now.getFullYear())] = 1;
+    years[String(now.getFullYear()-1)] = 1;
+    years[String(now.getFullYear()+1)] = 1;
+    years[String(state.year)] = 1;
+    var list = Object.keys(years).sort().reverse();
+    var html = '';
+    for(var k=0;k<list.length;k++) html += '<option value="'+list[k]+'">'+list[k]+'</option>';
+    $('yearSel').innerHTML = html;
+    $('yearSel').value = String(state.year);
+
+    var mh = '';
+    for(var m=0;m<12;m++) mh += '<option value="'+m+'">'+MONTHS[m]+'</option>';
+    $('monthSel').innerHTML = mh;
+    $('monthSel').value = String(state.month);
+  }
+
+  function setMode(mode){
+    state.mode = mode;
+    $('modeYear').setAttribute('aria-pressed', mode === 'year' ? 'true' : 'false');
+    $('modeMonth').setAttribute('aria-pressed', mode === 'month' ? 'true' : 'false');
+    $('monthSel').style.display = mode === 'month' ? '' : 'none';
+    render();
+  }
+
+  /* ---------- actions ---------- */
+  function flash(el, text, warn){
+    el.textContent = text;
+    el.className = warn ? 'msg warn' : 'msg';
+    window.setTimeout(function(){
+      if(el.textContent === text){ el.innerHTML = '&nbsp;'; el.className = 'msg'; }
+    }, 3200);
+  }
+
+  function addGift(){
+    var amt = parseFloat($('inAmount').value);
+    if(!isFinite(amt) || amt <= 0){ flash($('logMsg'),'Enter an amount greater than zero.', true); $('inAmount').focus(); return; }
+    var date = $('inDate').value;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) date = todayISO();
+    var gift = {
+      id: String(Date.now())+'-'+Math.round(Math.random()*100000),
+      date: date,
+      amount: Math.round(amt*100)/100,
+      to: $('inTo').value.trim().slice(0,60),
+      cat: ui.cat,
+      note: $('inNote').value.trim().slice(0,90)
+    };
+    state.gifts.push(gift);
+    save();
+    $('inAmount').value = '';
+    $('inNote').value = '';
+    buildPeriodSelects();
+    render();
+    flash($('logMsg'), fmt2.format(gift.amount)+' logged. Thanks be to God.', false);
+    $('inAmount').focus();
+  }
+
+  function deleteGift(id){
+    for(var i=0;i<state.gifts.length;i++){
+      if(state.gifts[i].id === id){
+        ui.lastDeleted = state.gifts.splice(i,1)[0];
+        save();
+        render();
+        showToast(fmt2.format(ui.lastDeleted.amount)+' removed');
+        return;
+      }
+    }
+  }
+
+  function showToast(text){
+    $('toastTxt').textContent = text;
+    $('toast').className = 'toast show';
+    window.clearTimeout(ui.toastTimer);
+    ui.toastTimer = window.setTimeout(hideToast, 7000);
+  }
+  function hideToast(){
+    $('toast').className = 'toast';
+    ui.lastDeleted = null;
+  }
+
+  function download(filename, text, type){
+    try{
+      var blob = new Blob([text], {type:type});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+    }catch(e){
+      flash($('setupMsg'),'This browser blocked the download.', true);
+    }
+  }
+
+  function csvCell(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }
+
+  function exportCsv(){
+    var list = periodGifts();
+    if(!list.length){ flash($('logMsg'),'Nothing to export for this period.', true); return; }
+    var rows = ['Date,Recipient,Category,Amount,Note'];
+    for(var i=list.length-1;i>=0;i--){
+      var g = list[i];
+      rows.push([csvCell(g.date), csvCell(g.to), csvCell(g.cat==='church'?'Church':'Other charity'),
+                 g.amount.toFixed(2), csvCell(g.note)].join(','));
+    }
+    download('giving-'+periodKey()+'.csv', rows.join('\r\n'), 'text/csv');
+  }
+
+  function exportJson(){
+    var payload = {
+      app:'appaday-104-giving-tree', exported: todayISO(),
+      income: state.income, freq: state.freq,
+      pctChurch: state.pctChurch, pctOther: state.pctOther,
+      gifts: state.gifts
+    };
+    download('giving-tree-backup.json', JSON.stringify(payload,null,2), 'application/json');
+  }
+
+  function importJson(file){
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var d = JSON.parse(String(reader.result));
+        var gifts = sanitizeGifts(d.gifts);
+        state.income = num(d.income);
+        state.freq = d.freq === 'monthly' ? 'monthly' : 'annual';
+        state.pctChurch = isFinite(parseFloat(d.pctChurch)) ? clamp(parseFloat(d.pctChurch),0,100) : state.pctChurch;
+        state.pctOther = isFinite(parseFloat(d.pctOther)) ? clamp(parseFloat(d.pctOther),0,100) : state.pctOther;
+        state.gifts = gifts;
+        save();
+        syncSetupInputs();
+        buildPeriodSelects();
+        render();
+        flash($('setupMsg'), gifts.length+' gifts restored.', false);
+      }catch(e){
+        flash($('setupMsg'),'That file could not be read.', true);
+      }
+    };
+    reader.onerror = function(){ flash($('setupMsg'),'That file could not be read.', true); };
+    reader.readAsText(file);
+  }
+
+  /* ---------- bulk import ---------- */
+  var imp = { rows:[], ready:[], stats:null };
+  var MONTH_NUM = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  var CHURCH_WORDS = /(church|parish|cathedral|diocese|tithe|chapel|basilica|abbey|monastery|oratory|shrine)/i;
+
+  function guessDelim(text){
+    var line = '';
+    var lines = text.split('\n');
+    for(var i=0;i<lines.length;i++){ if(lines[i].trim()){ line = lines[i]; break; } }
+    var best = ',', bestN = -1;
+    var cands = [',', '\t', ';', '|'];
+    for(var c=0;c<cands.length;c++){
+      var n = line.split(cands[c]).length - 1;
+      if(n > bestN){ bestN = n; best = cands[c]; }
+    }
+    return best;
+  }
+
+  function parseDelimited(text){
+    text = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    var delim = guessDelim(text);
+    var rows = [], row = [], cell = '', inQ = false;
+    for(var i=0;i<text.length;i++){
+      var ch = text.charAt(i);
+      if(inQ){
+        if(ch === '"'){
+          if(text.charAt(i+1) === '"'){ cell += '"'; i++; }
+          else inQ = false;
+        }else cell += ch;
+      }else{
+        if(ch === '"') inQ = true;
+        else if(ch === delim){ row.push(cell); cell = ''; }
+        else if(ch === '\n'){ row.push(cell); rows.push(row); row = []; cell = ''; }
+        else cell += ch;
+      }
+    }
+    row.push(cell); rows.push(row);
+    var out = [];
+    var width = 0;
+    for(var r=0;r<rows.length;r++){
+      if(rows[r].join('').trim() === '') continue;
+      if(rows[r].length > width) width = rows[r].length;
+      out.push(rows[r]);
+    }
+    for(var q=0;q<out.length;q++){
+      while(out[q].length < width) out[q].push('');
+      for(var w=0;w<out[q].length;w++) out[q][w] = String(out[q][w]).trim();
+    }
+    return out;
+  }
+
+  function isoFrom(y,m,d){
+    y = parseInt(y,10); m = parseInt(m,10); d = parseInt(d,10);
+    if(!(y>1900 && y<2200) || !(m>=1 && m<=12) || !(d>=1 && d<=31)) return '';
+    return y+'-'+pad2(m)+'-'+pad2(d);
+  }
+
+  function parseAnyDate(v, order){
+    var str = String(v).trim();
+    if(!str) return '';
+    var m = str.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);
+    if(m) return isoFrom(m[1],m[2],m[3]);
+    m = str.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/);
+    if(m){
+      var y = m[3];
+      if(y.length === 2) y = (parseInt(y,10) > 70 ? '19' : '20') + y;
+      var a = parseInt(m[1],10), b = parseInt(m[2],10);
+      if(order === 'dmy' || (order !== 'dmy' && a > 12 && b <= 12)) return isoFrom(y,b,a);
+      return isoFrom(y,a,b);
+    }
+    m = str.match(/^([A-Za-z]{3,9})\.?\s+(\d{1,2}),?\s+(\d{4})/);
+    if(m){
+      var mo = MONTH_NUM[m[1].slice(0,3).toLowerCase()];
+      if(mo) return isoFrom(m[3],mo,m[2]);
+    }
+    m = str.match(/^(\d{1,2})[-\s]([A-Za-z]{3,9})\.?[-\s](\d{2,4})/);
+    if(m){
+      var mo2 = MONTH_NUM[m[2].slice(0,3).toLowerCase()];
+      var y2 = m[3];
+      if(y2.length === 2) y2 = (parseInt(y2,10) > 70 ? '19' : '20') + y2;
+      if(mo2) return isoFrom(y2,mo2,m[1]);
+    }
+    return '';
+  }
+
+  function parseMoney(v){
+    var str = String(v).replace(/[$\u00a3\u20ac\u00a5]/g,'').replace(/,/g,'').replace(/\s/g,'').trim();
+    if(!str) return 0;
+    if(/^\(.*\)$/.test(str)) str = str.slice(1,-1);
+    var n = parseFloat(str);
+    if(!isFinite(n)) return 0;
+    return Math.round(Math.abs(n)*100)/100;
+  }
+
+  function dupKey(g){
+    return g.date + '|' + g.amount.toFixed(2) + '|' + String(g.to).toLowerCase();
+  }
+
+  function colCount(){ return imp.rows.length ? imp.rows[0].length : 0; }
+
+  function dataRows(){
+    return $('hasHeader').value === '1' ? imp.rows.slice(1) : imp.rows.slice(0);
+  }
+
+  function fillColumnSelects(){
+    var n = colCount();
+    var header = $('hasHeader').value === '1' ? imp.rows[0] : null;
+    var labels = [];
+    for(var i=0;i<n;i++){
+      var name = header && header[i] ? header[i].slice(0,28) : 'Column '+(i+1);
+      labels.push(name);
+    }
+    var ids = ['colDate','colAmount','colTo'];
+    for(var k=0;k<ids.length;k++){
+      var sel = $(ids[k]);
+      var keep = sel.value;
+      var html = (ids[k] === 'colTo') ? '<option value="-1">No recipient column</option>' : '';
+      for(var j=0;j<n;j++) html += '<option value="'+j+'">'+esc(labels[j])+'</option>';
+      sel.innerHTML = html;
+      if(keep !== '' && sel.querySelector('option[value="'+keep+'"]')) sel.value = keep;
+    }
+    var cat = $('colCat');
+    var keepCat = cat.value;
+    var chtml = '<option value="all-church">All to Church</option>'
+      + '<option value="all-other">All to Other charity</option>'
+      + '<option value="guess">Guess from recipient</option>';
+    for(var c=0;c<n;c++) chtml += '<option value="'+c+'">'+esc(labels[c])+'</option>';
+    cat.innerHTML = chtml;
+    if(keepCat !== '' && cat.querySelector('option[value="'+keepCat+'"]')) cat.value = keepCat;
+  }
+
+  function autoGuessColumns(){
+    var n = colCount();
+    var header = imp.rows[0] || [];
+    var sample = imp.rows.slice($('hasHeader').value === '1' ? 1 : 0, 21);
+    var scores = {date:[], amount:[], to:[], cat:[]};
+    for(var i=0;i<n;i++){
+      var h = String(header[i] || '').toLowerCase();
+      var dHit = 0, aHit = 0, tHit = 0, cHit = 0, seen = 0;
+      for(var r=0;r<sample.length;r++){
+        var v = sample[r][i];
+        if(v === undefined || v === '') continue;
+        seen++;
+        if(parseAnyDate(v,'mdy')) dHit++;
+        if(/^[\s$(]*[\d.,]+\)?$/.test(String(v)) && parseMoney(v) > 0) aHit++;
+        if(/[a-z]{3}/i.test(String(v)) && !parseAnyDate(v,'mdy')) tHit++;
+        if(/^(church|other|charity|tithe|parish|offering)$/i.test(String(v))) cHit++;
+      }
+      var norm = seen ? seen : 1;
+      scores.date.push(dHit/norm + (/date|when|posted|day/.test(h) ? 1.2 : 0));
+      scores.amount.push(aHit/norm + (/amount|amt|total|value|gift|debit|credit|sum|paid/.test(h) ? 1.2 : 0));
+      scores.to.push(tHit/norm + (/name|recipient|payee|descr|organization|charity|memo|to|vendor|fund/.test(h) ? 1.2 : 0));
+      scores.cat.push(cHit/norm + (/categ|type|kind|bucket/.test(h) ? 1.2 : 0));
+    }
+    function best(arr, exclude){
+      var bi = -1, bv = 0.45;
+      for(var i=0;i<arr.length;i++){
+        if(exclude.indexOf(i) > -1) continue;
+        if(arr[i] > bv){ bv = arr[i]; bi = i; }
+      }
+      return bi;
+    }
+    var used = [];
+    var di = best(scores.date, used); if(di > -1) used.push(di);
+    var ai = best(scores.amount, used); if(ai > -1) used.push(ai);
+    var ci = best(scores.cat, used); if(ci > -1) used.push(ci);
+    var ti = best(scores.to, used); if(ti > -1) used.push(ti);
+    $('colDate').value = String(di > -1 ? di : 0);
+    $('colAmount').value = String(ai > -1 ? ai : Math.min(1, colCount()-1));
+    $('colTo').value = String(ti > -1 ? ti : -1);
+    $('colCat').value = ci > -1 ? String(ci) : 'guess';
+  }
+
+  function buildImport(){
+    var di = parseInt($('colDate').value,10);
+    var ai = parseInt($('colAmount').value,10);
+    var ti = parseInt($('colTo').value,10);
+    var catMode = $('colCat').value;
+    var order = $('dateOrder').value;
+    var rows = dataRows();
+    var seen = {};
+    for(var e=0;e<state.gifts.length;e++) seen[dupKey(state.gifts[e])] = 1;
+    var ready = [], skipped = 0, dupes = 0, total = 0;
+    for(var r=0;r<rows.length;r++){
+      var row = rows[r];
+      var date = parseAnyDate(row[di],order);
+      var amount = parseMoney(row[ai]);
+      if(!date || amount <= 0){ skipped++; continue; }
+      var to = ti > -1 ? String(row[ti] || '').slice(0,60) : '';
+      var cat;
+      if(catMode === 'all-church') cat = 'church';
+      else if(catMode === 'all-other') cat = 'other';
+      else if(catMode === 'guess') cat = CHURCH_WORDS.test(to) ? 'church' : 'other';
+      else{
+        var raw = String(row[parseInt(catMode,10)] || '');
+        cat = CHURCH_WORDS.test(raw) ? 'church' : (raw ? 'other' : 'other');
+      }
+      var g = {
+        id: 'imp-'+Date.now()+'-'+r+'-'+Math.round(Math.random()*100000),
+        date: date, amount: amount, to: to, cat: cat, note: ''
+      };
+      var key = dupKey(g);
+      if(seen[key]){ dupes++; continue; }
+      seen[key] = 1;
+      ready.push(g);
+      total += amount;
+    }
+    imp.ready = ready;
+    imp.stats = {count:ready.length, total:total, skipped:skipped, dupes:dupes};
+    renderImportPreview();
+  }
+
+  function renderImportPreview(){
+    var st = imp.stats;
+    var bits = '<b>'+st.count+'</b> gift'+(st.count===1?'':'s')+' ready, <b>'+esc(fmt2.format(st.total))+'</b> total';
+    if(st.dupes) bits += ' &middot; <span class="bad">'+st.dupes+' already logged</span>';
+    if(st.skipped) bits += ' &middot; <span class="bad">'+st.skipped+' unreadable</span>';
+    $('impTally').innerHTML = bits;
+    var html = '';
+    var show = imp.ready.slice(0,5);
+    for(var i=0;i<show.length;i++){
+      var g = show[i];
+      html += '<div class="prow"><span class="pdate">'+esc(g.date)+'</span>'
+        + '<span class="pto">'+esc(g.to || (g.cat==='church'?'Church':'Charity'))+'</span>'
+        + '<span><span class="swatch '+(g.cat==='church'?'sw-church':'sw-other')+'"></span> '+esc(fmt2.format(g.amount))+'</span></div>';
+    }
+    if(imp.ready.length > show.length){
+      html += '<div class="prow"><span class="pdate">'+(imp.ready.length-show.length)+' more</span><span></span><span></span></div>';
+    }
+    if(!html) html = '<p class="hint">Nothing readable yet. Try a different column match.</p>';
+    $('impPreview').innerHTML = html;
+    $('doImportBtn').disabled = imp.ready.length === 0;
+  }
+
+  function openImporter(text){
+    var rows = parseDelimited(text);
+    if(!rows.length){ flash($('setupMsg'),'No rows found in that file.', true); return; }
+    imp.rows = rows;
+    if(rows[0].length < 2){
+      flash($('setupMsg'),'Only one column found. Check the file separators.', true);
+      return;
+    }
+    $('hasHeader').value = looksLikeHeader(rows[0]) ? '1' : '0';
+    fillColumnSelects();
+    autoGuessColumns();
+    $('mapPanel').style.display = '';
+    buildImport();
+    $('mapPanel').scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function looksLikeHeader(row){
+    var textish = 0;
+    for(var i=0;i<row.length;i++){
+      var v = row[i];
+      if(!v) continue;
+      if(parseAnyDate(v,'mdy')) return false;
+      if(parseMoney(v) > 0 && /^[\s$(]*[\d.,]+\)?$/.test(String(v))) return false;
+      if(/[a-z]/i.test(v)) textish++;
+    }
+    return textish >= 2;
+  }
+
+  function closeImporter(){
+    $('mapPanel').style.display = 'none';
+    $('pasteArea').style.display = 'none';
+    $('pasteArea').value = '';
+    $('parseBtn').style.display = 'none';
+    imp.rows = []; imp.ready = []; imp.stats = null;
+  }
+
+  function commitImport(){
+    if(!imp.ready.length) return;
+    var years = {}, top = null, topN = 0;
+    for(var i=0;i<imp.ready.length;i++){
+      var y = imp.ready[i].date.slice(0,4);
+      years[y] = (years[y]||0)+1;
+      if(years[y] > topN){ topN = years[y]; top = y; }
+    }
+    var n = imp.ready.length;
+    var sum = imp.stats.total;
+    state.gifts = state.gifts.concat(imp.ready);
+    save();
+    closeImporter();
+    buildPeriodSelects();
+    var inCurrent = state.gifts.filter(inPeriod).length;
+    if(!inCurrent && top){
+      state.year = parseInt(top,10);
+      $('yearSel').value = top;
+      if(state.mode === 'month') setMode('year');
+    }
+    render();
+    flash($('setupMsg'), n+' gifts imported, '+fmt2.format(sum)+' total.', false);
+  }
+
+  function readFileAsText(file, done){
+    var reader = new FileReader();
+    reader.onload = function(){ done(String(reader.result)); };
+    reader.onerror = function(){ flash($('setupMsg'),'That file could not be read.', true); };
+    reader.readAsText(file);
+  }
+
+  function syncSetupInputs(){
+    $('inIncome').value = state.income ? String(state.income) : '';
+    $('inFreq').value = state.freq;
+    $('inPctChurch').value = String(state.pctChurch);
+    $('inPctOther').value = String(state.pctOther);
+  }
+
+  /* ---------- wiring ---------- */
+  function selectTab(name){
+    var map = {log:'tabLog', gifts:'tabGifts', setup:'tabSetup'};
+    var btns = {log:'tabLogBtn', gifts:'tabGiftsBtn', setup:'tabSetupBtn'};
+    var keys = Object.keys(map);
+    for(var i=0;i<keys.length;i++){
+      var k = keys[i];
+      $(map[k]).className = k === name ? 'tabpane active' : 'tabpane';
+      $(btns[k]).setAttribute('aria-selected', k === name ? 'true' : 'false');
+    }
+  }
+
+  function init(){
+    load();
+    buildTree();
+    buildPeriodSelects();
+    syncSetupInputs();
+    $('inDate').value = todayISO();
+
+    $('modeYear').addEventListener('click', function(){ setMode('year'); });
+    $('modeMonth').addEventListener('click', function(){ setMode('month'); });
+    $('yearSel').addEventListener('change', function(){ state.year = parseInt(this.value,10); render(); });
+    $('monthSel').addEventListener('change', function(){ state.month = parseInt(this.value,10); render(); });
+
+    $('tabLogBtn').addEventListener('click', function(){ selectTab('log'); });
+    $('tabGiftsBtn').addEventListener('click', function(){ selectTab('gifts'); });
+    $('tabSetupBtn').addEventListener('click', function(){ selectTab('setup'); });
+
+    var catBtns = document.querySelectorAll('.catpick button');
+    for(var i=0;i<catBtns.length;i++){
+      catBtns[i].addEventListener('click', function(){
+        ui.cat = this.getAttribute('data-cat');
+        for(var j=0;j<catBtns.length;j++){
+          catBtns[j].setAttribute('aria-pressed', catBtns[j] === this ? 'true' : 'false');
+        }
+      });
+    }
+
+    $('addBtn').addEventListener('click', addGift);
+    var enterFields = ['inAmount','inTo','inNote'];
+    for(var e=0;e<enterFields.length;e++){
+      $(enterFields[e]).addEventListener('keydown', function(ev){
+        if(ev.key === 'Enter'){ ev.preventDefault(); addGift(); }
+      });
+    }
+
+    $('giftList').addEventListener('click', function(ev){
+      var t = ev.target;
+      if(t && t.className === 'del'){ deleteGift(t.getAttribute('data-id')); }
+    });
+
+    $('searchIn').addEventListener('input', function(){ ui.search = this.value; render(); });
+    var chips = document.querySelectorAll('.chip');
+    for(var c=0;c<chips.length;c++){
+      chips[c].addEventListener('click', function(){
+        ui.filter = this.getAttribute('data-filter');
+        for(var k=0;k<chips.length;k++){
+          chips[k].setAttribute('aria-pressed', chips[k] === this ? 'true' : 'false');
+        }
+        render();
+      });
+    }
+
+    $('csvBtn').addEventListener('click', exportCsv);
+    $('jsonBtn').addEventListener('click', exportJson);
+    $('importBtn').addEventListener('click', function(){ $('fileIn').click(); });
+
+    $('csvFileBtn').addEventListener('click', function(){ $('csvIn').click(); });
+    $('csvIn').addEventListener('change', function(){
+      if(this.files && this.files[0]) readFileAsText(this.files[0], openImporter);
+      this.value = '';
+    });
+    $('pasteBtn').addEventListener('click', function(){
+      var ta = $('pasteArea');
+      var open = ta.style.display === 'none';
+      ta.style.display = open ? '' : 'none';
+      $('parseBtn').style.display = open ? '' : 'none';
+      if(open) ta.focus();
+    });
+    $('parseBtn').addEventListener('click', function(){
+      var txt = $('pasteArea').value.trim();
+      if(!txt){ flash($('setupMsg'),'Paste some rows first.', true); return; }
+      openImporter(txt);
+    });
+    var mapFields = ['colDate','colAmount','colTo','colCat','dateOrder'];
+    for(var mf=0;mf<mapFields.length;mf++){
+      $(mapFields[mf]).addEventListener('change', buildImport);
+    }
+    $('hasHeader').addEventListener('change', function(){
+      fillColumnSelects();
+      buildImport();
+    });
+    $('doImportBtn').addEventListener('click', commitImport);
+    $('cancelImportBtn').addEventListener('click', closeImporter);
+    $('fileIn').addEventListener('change', function(){
+      if(this.files && this.files[0]) importJson(this.files[0]);
+      this.value = '';
+    });
+
+    $('undoBtn').addEventListener('click', function(){
+      if(ui.lastDeleted){
+        state.gifts.push(ui.lastDeleted);
+        save();
+        render();
+      }
+      hideToast();
+    });
+
+    $('inIncome').addEventListener('input', function(){ state.income = num(this.value); save(); render(); });
+    $('inFreq').addEventListener('change', function(){ state.freq = this.value === 'monthly' ? 'monthly' : 'annual'; save(); render(); });
+    $('inPctChurch').addEventListener('input', function(){
+      var v = parseFloat(this.value); state.pctChurch = isFinite(v) ? clamp(v,0,100) : 0; save(); render();
+    });
+    $('inPctOther').addEventListener('input', function(){
+      var v = parseFloat(this.value); state.pctOther = isFinite(v) ? clamp(v,0,100) : 0; save(); render();
+    });
+
+    $('resetBtn').addEventListener('click', function(){
+      var btn = this;
+      if(!ui.pendingReset){
+        ui.pendingReset = true;
+        btn.textContent = 'Tap again to erase everything';
+        ui.resetTimer = window.setTimeout(function(){
+          ui.pendingReset = false; btn.textContent = 'Erase all data';
+        }, 4500);
+        return;
+      }
+      window.clearTimeout(ui.resetTimer);
+      ui.pendingReset = false;
+      btn.textContent = 'Erase all data';
+      state.gifts = [];
+      state.income = 0;
+      state.pctChurch = 8;
+      state.pctOther = 2;
+      state.freq = 'annual';
+      try{ localStorage.removeItem(LS_KEY); }catch(err){ /* ignore */ }
+      syncSetupInputs();
+      buildPeriodSelects();
+      render();
+      flash($('setupMsg'),'All data erased.', false);
+    });
+
+    render();
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  }else{
+    init();
+  }
+})();
+</script>
+</body>
+</html>
